@@ -1,0 +1,12 @@
+server {
+  listen  80;
+  server_name localhost;
+
+  location / {
+    try_files $uri/index.html $uri @deploy_task;
+  }
+
+  location @deploy_task {
+    proxy_pass http://localhost:7890;
+  }
+}

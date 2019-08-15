@@ -1,0 +1,47 @@
+- name: Apt install packages
+  apt:
+    name:
+      - 'zlib1g-dev'
+      - 'build-essential'
+      - 'libssl-dev'
+      - 'libreadline-dev'
+      - 'libyaml-dev'
+      - 'libxml2-dev'
+      - 'libxslt1-dev'
+      - 'libcurl4-openssl-dev'
+      - 'libffi-dev'
+    update_cache: yes
+    state: present
+- name: git clone renv
+  git:
+    repo: https://github.com/sstephenson/rbenv.git
+    dest: /usr/local/rbenv
+- name: install renv
+  template:
+    src: rbenv_system.sh.j2
+    dest: /etc/profile.d/rbenv.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: git clone ruby-build
+  git:
+    repo: https://github.com/sstephenson/ruby-build.git
+    dest: /usr/local/rbenv/plugins/ruby-build
+- name: chgroup rbenv
+  file:
+    path: /usr/local/rbenv
+    owner: root
+    group: ubuntu
+    recurse: yes
+    state: directory
+- name: install ruby
+  shell: bash -lc "rbenv install --skip-existing 2.6.3"
+- name: globalize ruby
+  shell: bash -lc "rbenv global 2.6.3"
+- name: install bundler
+  gem:
+    name: bundler
+    user_install: no
+    executable: /usr/local/rbenv/shims/gem
+- name: update bundler
+  shell: bash -lc "gem update bundler && rbenv rehash"

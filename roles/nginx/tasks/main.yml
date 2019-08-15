@@ -1,8 +1,32 @@
 - name: install nginx
-  apt: 
+  apt:
     name: nginx
     state: latest
     update_cache: yes
+
+- name: delete nginx conf default symlink
+  file: path="/etc/nginx/sites-enabled/default" state=absent
+
+- name: create nginx conf symlink
+  file:
+    path: "/etc/nginx/sites-enabled/nginx_puma"
+    src: "/etc/nginx/sites-available/nginx_puma"
+    owner: root
+    group: root
+    mode: 0777
+    state: link
+    force: yes
+
+- name: write the nginx config file -application-
+  template:
+    src: files/nginx_puma
+    dest: /etc/nginx/sites-available/nginx_puma
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+  - restart nginx
+
 - name: start nginx
   service:
     name: nginx
